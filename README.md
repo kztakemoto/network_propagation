@@ -1,5 +1,5 @@
 # Network propagation
-Python-implemented link prediction algorithms based on network propagation are available.
+Network propagation-based link prediction methods implemented in Python are available.
 
 ## PRINCE (PRIoritizatioN and Complex Elucidation)
 Vanunu O, Magger O, Ruppin E, Shlomi T, Sharan R (2010) Associating Genes and Protein Complexes with Disease via Network Propagation. PLoS Comput Biol 6(1): e1000641. doi:[10.1371/journal.pcbi.1000641](https://doi.org/10.1371/journal.pcbi.1000641)
