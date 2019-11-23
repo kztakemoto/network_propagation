@@ -13,7 +13,7 @@ from sklearn.metrics import roc_auc_score, auc
 import matplotlib.pyplot as plt
 
 #### Parameters #############
-parser = argparse.ArgumentParser(description='Runs PRINCE')
+parser = argparse.ArgumentParser(description='Runs MINProp')
 parser.add_argument('--alphaP', type=float, default=0.25, help='diffusion parameter')
 parser.add_argument('--alphaD', type=float, default=0.25, help='diffusion parameter')
 parser.add_argument('--max_iter', type=int, default=1000, help='maximum number of iterations')
