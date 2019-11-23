@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 
 #### Parameters #############
 parser = argparse.ArgumentParser(description='Runs MINProp')
-parser.add_argument('--alphaP', type=float, default=0.25, help='diffusion parameter')
-parser.add_argument('--alphaD', type=float, default=0.25, help='diffusion parameter')
+parser.add_argument('--alphaP', type=float, default=0.25, help='diffusion parameter for the protein-protein interaction network')
+parser.add_argument('--alphaD', type=float, default=0.25, help='diffusion parameter for the disease similarity network')
 parser.add_argument('--max_iter', type=int, default=1000, help='maximum number of iterations')
 parser.add_argument('--eps', type=float, default=1.0e-6, help='convergence threshold')
 parser.add_argument('--dir_data', type=str, default='./', help='directory of network data')
