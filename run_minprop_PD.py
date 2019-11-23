@@ -8,13 +8,14 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import scipy.sparse as sp
-from network_propagation_methods import netprop
+from network_propagation_methods import minprop_2
 from sklearn.metrics import roc_auc_score, auc
 import matplotlib.pyplot as plt
 
 #### Parameters #############
 parser = argparse.ArgumentParser(description='Runs PRINCE')
-parser.add_argument('--alpha', type=float, default=0.25, help='diffusion parameter')
+parser.add_argument('--alphaP', type=float, default=0.25, help='diffusion parameter')
+parser.add_argument('--alphaD', type=float, default=0.25, help='diffusion parameter')
 parser.add_argument('--max_iter', type=int, default=1000, help='maximum number of iterations')
 parser.add_argument('--eps', type=float, default=1.0e-6, help='convergence threshold')
 parser.add_argument('--dir_data', type=str, default='./', help='directory of network data')
@@ -56,9 +57,14 @@ nodelist_networkD = list(adj_networkD.index.values)
 # conversion using logstic function
 PheSim = np.array(adj_networkD)
 PheSim = 1 / (1 + np.exp(-15 * PheSim + np.log(9999)))
-np.fill_diagonal(PheSim, 1)
+np.fill_diagonal(PheSim, 0.0)
 PheSim = sp.csr_matrix(PheSim)
+PheSim.eliminate_zeros()
+# normalized adjacency matrix
+deg_networkD = np.sum(PheSim, axis=0)
+norm_adj_networkD = sp.csr_matrix(PheSim / np.sqrt(np.dot(deg_networkD.T, deg_networkD)), dtype=np.float64)
 del(adj_networkD)
+del(PheSim)
 
 ### protein-disease network (data used in PRINCE study)
 biadj_networkPD = sp.lil_matrix((len(nodelist_networkP), len(nodelist_networkD)), dtype=np.float64)
@@ -90,10 +96,18 @@ for i in range(nb_PD_pairs):
     idx_D = PD_pairs[1][i]
     biadj_networkPD[idx_P, idx_D] = 0.0
     biadj_networkPD.eliminate_zeros()
+    # normalized biadjacency matrix (ToDo: faster implementation)
+    degP = np.sum(biadj_networkPD, axis=1)
+    degD = np.sum(biadj_networkPD, axis=0)
+    norm_biadj_networkPD = sp.csr_matrix(biadj_networkPD / np.sqrt(np.dot(degP, degD)), dtype=np.float64)
+    norm_biadj_networkPD.data[np.isnan(norm_biadj_networkPD.data)] = 0.0
+    norm_biadj_networkPD.eliminate_zeros()
     # set initial label
-    yP = np.ravel(sp.csr_matrix.max(biadj_networkPD.multiply(PheSim[idx_D]), axis=1).todense())
+    yP = np.zeros(len(nodelist_networkP), dtype=np.float64)
+    yD = np.zeros(len(nodelist_networkD), dtype=np.float64)
+    yD[idx_D] = 1.0
     # propagation
-    fP, convergent = netprop(norm_adj_networkP, yP, args.alpha, args.eps, args.max_iter)
+    fP, fD, convergent = minprop_2(norm_adj_networkP, norm_adj_networkD, norm_biadj_networkPD, yP, yD, args.alphaP, args.alphaD, args.eps, args.max_iter)
     # ranking table
     labels_real = np.zeros(nb_proteins)
     labels_real[idx_P] = 1
@@ -103,7 +117,7 @@ for i in range(nb_PD_pairs):
         rankings = sp.vstack([rankings, labels_real[np.argsort(-fP)]])
     # get AUC value
     roc_value = roc_auc_score(labels_real, fP)
-    print(i, "AUC:", roc_value)
+    print(i, "AUC:", roc_value, convergent)
     roc_value_set = np.append(roc_value_set, roc_value)
     # reassign the protein-disease association
     biadj_networkPD[idx_P, idx_D] = 1.0
