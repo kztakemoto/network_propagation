@@ -57,7 +57,7 @@ nodelist_networkD = list(adj_networkD.index.values)
 # conversion using logstic function
 PheSim = np.array(adj_networkD)
 PheSim = 1 / (1 + np.exp(-15 * PheSim + np.log(9999)))
-np.fill_diagonal(PheSim, 0.0)
+np.fill_diagonal(PheSim, 1.0)
 PheSim = sp.csr_matrix(PheSim)
 PheSim.eliminate_zeros()
 # normalized adjacency matrix
