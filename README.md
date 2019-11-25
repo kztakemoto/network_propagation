@@ -25,7 +25,7 @@ Hwang TH, Kuang R (2010) A Heterogeneous Label Propagation Algorithm for Disease
 See ``example_minprop.py`` for the usage of the MINProp-related functions.
 
 #### Example
-Protein-disease association prediction using 2 home networks: the protein-protein interaction network and disease similarity network.
+Protein-disease association prediction using 2 homo subnetworks: the protein-protein interaction network and disease similarity network.
 ```
 python run_minprop_PD.py --alphaP 0.15 --alphaD 0.05 --eps 0.01
 ```

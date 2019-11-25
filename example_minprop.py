@@ -31,14 +31,14 @@ fP, convergent = netprop(norm_adj_networkP, yP, alphaP, eps, max_iter)
 print(convergent)
 print(fP)
 
-## MINProp with 2 homo networks
+## MINProp with 2 homo subnetworks
 fP, fD, convergent = minprop_2(norm_adj_networkP, norm_adj_networkD, norm_biadj_networkPD, yP, yD, alphaP, alphaD, eps, max_iter)
 
 print(convergent)
 print(fP)
 print(fD)
 
-## MINProp with 3 homo networks
+## MINProp with 3 homo subnetworks
 fP, fD, fC, convergent = minprop_3(norm_adj_networkP, norm_adj_networkD, norm_adj_networkC, norm_biadj_networkPD, norm_biadj_networkPC, norm_biadj_networkDC, yP, yD, yC, alphaP, alphaD, alphaC, eps, max_iter)
 
 print(convergent)
