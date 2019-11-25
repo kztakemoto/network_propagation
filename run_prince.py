@@ -103,7 +103,7 @@ for i in range(nb_PD_pairs):
         rankings = sp.vstack([rankings, labels_real[np.argsort(-fP)]])
     # get AUC value
     roc_value = roc_auc_score(labels_real, fP)
-    print(i, "AUC:", roc_value)
+    print(i, "AUC:", roc_value, convergent)
     roc_value_set = np.append(roc_value_set, roc_value)
     # reassign the protein-disease association
     biadj_networkPD[idx_P, idx_D] = 1.0
