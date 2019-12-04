@@ -10,6 +10,7 @@ import networkx as nx
 import scipy.sparse as sp
 from network_propagation_methods import netprop
 from sklearn.metrics import roc_auc_score, auc
+from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
 
 #### Parameters #############
@@ -17,7 +18,7 @@ parser = argparse.ArgumentParser(description='Runs PRINCE')
 parser.add_argument('--alpha', type=float, default=0.25, help='diffusion parameter')
 parser.add_argument('--max_iter', type=int, default=1000, help='maximum number of iterations')
 parser.add_argument('--eps', type=float, default=1.0e-6, help='convergence threshold')
-parser.add_argument('--dir_data', type=str, default='./', help='directory of network data')
+parser.add_argument('--dir_data', type=str, default='~/workspace/dataset/ctd_network_propagation/', help='directory of network data')
 args = parser.parse_args()
 
 #### load data ############
@@ -64,6 +65,7 @@ del(adj_networkD)
 biadj_networkPD = sp.lil_matrix((len(nodelist_networkP), len(nodelist_networkD)), dtype=np.float64)
 data = pd.read_csv(args.dir_data + "associations.txt", header=None, delimiter='\t', comment='#')
 data_sub = data[[0,1]]
+del(data)
 data_sub = data_sub.drop_duplicates()
 # extract the pairs of nodes appering network P and network D, respectively
 data_sub = data_sub[data_sub[1].isin(nodelist_networkP) & data_sub[0].isin(nodelist_networkD)]
@@ -75,6 +77,7 @@ for index, row in data_sub.iterrows():
     biadj_networkPD[idxP,idxD] = 1
 
 biadj_networkPD = sp.csr_matrix(biadj_networkPD)
+del(data_sub)
 
 # get the list of protein-disease pairs
 PD_pairs = biadj_networkPD.nonzero()
@@ -82,42 +85,42 @@ PD_pairs = biadj_networkPD.nonzero()
 nb_PD_pairs = len(PD_pairs[0])
 
 #### Network propagation PRINCE ###########################
-roc_value_set = np.array([])
-for i in range(nb_PD_pairs):
+def prince(i):
     # leave-one-out validation
     # remove a protein-disease association
     idx_P = PD_pairs[0][i]
     idx_D = PD_pairs[1][i]
-    biadj_networkPD[idx_P, idx_D] = 0.0
-    biadj_networkPD.eliminate_zeros()
+    mod_biadj_networkPD = biadj_networkPD.copy()
+    mod_biadj_networkPD[idx_P, idx_D] = 0.0
+    mod_biadj_networkPD.eliminate_zeros()
     # set initial label
-    yP = np.ravel(sp.csr_matrix.max(biadj_networkPD.multiply(PheSim[idx_D]), axis=1).todense())
+    yP = np.ravel(sp.csr_matrix.max(mod_biadj_networkPD.multiply(PheSim[idx_D]), axis=1).todense())
     # propagation
     fP, convergent = netprop(norm_adj_networkP, yP, args.alpha, args.eps, args.max_iter)
-    # ranking table
+    # ranking
     labels_real = np.zeros(nb_proteins)
     labels_real[idx_P] = 1
-    if i == 0:
-        rankings = sp.coo_matrix(labels_real[np.argsort(-fP)])
-    else:
-        rankings = sp.vstack([rankings, labels_real[np.argsort(-fP)]])
+    rank = int(np.where(labels_real[np.argsort(-fP)]==1)[0]) + 1
     # get AUC value
     roc_value = roc_auc_score(labels_real, fP)
     print(i, "AUC:", roc_value, convergent)
-    roc_value_set = np.append(roc_value_set, roc_value)
-    # reassign the protein-disease association
-    biadj_networkPD[idx_P, idx_D] = 1.0
+    return convergent, roc_value, rank
 
+# Parallel computation using Joblib. n_jobs: #cores (n_jobs = -1 means that all available CPUs are used)
+sub = Parallel(n_jobs=-1, backend="threading")( [delayed(prince)(i) for i in range(nb_PD_pairs)] )
+sub = pd.DataFrame(sub)
+
+roc_value_set = sub[1]
 print("Average AUC", np.mean(roc_value_set))
 
 # compute sensitivity and top rate (ROC-like curve)
 # ToDo: faster implementation
-rankings = sp.csr_matrix(rankings)
+rankings = sub[2]
 sen_set = np.array([])
 top_rate_set = np.array([])
 for k in range(nb_proteins):
     # sensitibity
-    sen = np.sum(rankings[:,:k+1]) / nb_PD_pairs
+    sen = (rankings <= (k+1)).sum() / nb_PD_pairs
     # top rate
     top_rate = (k + 1) / nb_proteins
     
