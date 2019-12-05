@@ -88,7 +88,8 @@ PD_pairs = biadj_networkPD.nonzero()
 nb_PD_pairs = len(PD_pairs[0])
 
 #### Network propagation PRINCE ###########################
-roc_value_set = np.array([])
+roc_value_set = np.array([], dtype=np.float64)
+rankings = np.array([], dtype=np.int64)
 for i in range(nb_PD_pairs):
     # leave-one-out validation
     # remove a protein-disease association
@@ -111,10 +112,8 @@ for i in range(nb_PD_pairs):
     # ranking table
     labels_real = np.zeros(nb_proteins)
     labels_real[idx_P] = 1
-    if i == 0:
-        rankings = sp.coo_matrix(labels_real[np.argsort(-fP)])
-    else:
-        rankings = sp.vstack([rankings, labels_real[np.argsort(-fP)]])
+    rank = int(np.where(labels_real[np.argsort(-fP)]==1)[0]) + 1
+    rankings = np.append(rankings, rank)
     # get AUC value
     roc_value = roc_auc_score(labels_real, fP)
     print(i, "AUC:", roc_value, convergent)
@@ -126,12 +125,11 @@ print("Average AUC", np.mean(roc_value_set))
 
 # compute sensitivity and top rate (ROC-like curve)
 # ToDo: faster implementation
-rankings = sp.csr_matrix(rankings)
-sen_set = np.array([])
-top_rate_set = np.array([])
+sen_set = np.array([], dtype=np.float64)
+top_rate_set = np.array([], dtype=np.float64)
 for k in range(nb_proteins):
     # sensitibity
-    sen = np.sum(rankings[:,:k+1]) / nb_PD_pairs
+    sen = (rankings <= (k+1)).sum() / nb_PD_pairs
     # top rate
     top_rate = (k + 1) / nb_proteins
     

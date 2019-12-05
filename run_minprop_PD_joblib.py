@@ -130,8 +130,8 @@ print("Average AUC", np.mean(roc_value_set))
 # compute sensitivity and top rate (ROC-like curve)
 # ToDo: faster implementation
 rankings = sub[2]
-sen_set = np.array([])
-top_rate_set = np.array([])
+sen_set = np.array([], dtype=np.float64)
+top_rate_set = np.array([], dtype=np.float64)
 for k in range(nb_proteins):
     # sensitibity
     sen = (rankings <= (k+1)).sum() / nb_PD_pairs
