@@ -109,7 +109,7 @@ for i in range(nb_PD_pairs):
     yD[idx_D] = 1.0
     # propagation
     fP, fD, convergent = minprop_2(norm_adj_networkP, norm_adj_networkD, norm_biadj_networkPD, yP, yD, args.alphaP, args.alphaD, args.eps, args.max_iter)
-    # ranking table
+    # ranking
     labels_real = np.zeros(nb_proteins)
     labels_real[idx_P] = 1
     rank = int(np.where(labels_real[np.argsort(-fP)]==1)[0]) + 1
