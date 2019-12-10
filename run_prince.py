@@ -4,6 +4,7 @@ import sys
 sys.dont_write_bytecode = True
 
 import argparse
+import pickle
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -17,64 +18,22 @@ parser = argparse.ArgumentParser(description='Runs PRINCE')
 parser.add_argument('--alpha', type=float, default=0.25, help='diffusion parameter')
 parser.add_argument('--max_iter', type=int, default=1000, help='maximum number of iterations')
 parser.add_argument('--eps', type=float, default=1.0e-6, help='convergence threshold')
-parser.add_argument('--dir_data', type=str, default='./', help='directory of network data')
+parser.add_argument('--dir_data', type=str, default='./data/', help='directory of pickled network data')
 args = parser.parse_args()
 
 #### load data ############
 ### protein-protein interaction network
-data = pd.read_csv(args.dir_data + "hippie_current.txt", delimiter='\t', header=None)
-edgelist = data[[1,3,4]]
-del(data)
-edgelist = edgelist.rename(columns={1: 'source', 3: 'target', 4: 'weight'})
-edgelist = edgelist[edgelist['weight'] > 0.0]
-edgelist = edgelist.drop_duplicates()
-# network object
-g = nx.from_pandas_edgelist(edgelist, source='source', target='target', edge_attr='weight')
-# extract the largest connected component
-obj_networkP = max(nx.connected_component_subgraphs(g), key=len)
-del(g)
-
-# get adjacency matrix
-adj_networkP = nx.adjacency_matrix(obj_networkP)
-# remove selfloop
-sp.csr_matrix.setdiag(adj_networkP, 0)
-adj_networkP.eliminate_zeros()
-# get node list
-nodelist_networkP = list(obj_networkP.nodes)
-del(obj_networkP)
-# normalized adjacency matrix
-deg_networkP = np.sum(adj_networkP, axis=0)
-norm_adj_networkP = sp.csr_matrix(adj_networkP / np.sqrt(np.dot(deg_networkP.T, deg_networkP)), dtype=np.float64)
-# #proteins
-nb_proteins = adj_networkP.shape[0]
-del(adj_networkP)
+with open(args.dir_data + 'norm_adj_networkP.pickle', mode='rb') as f:
+    norm_adj_networkP = pickle.load(f)
+nb_proteins = norm_adj_networkP.shape[0]
 
 ### disease similarity network
-adj_networkD = pd.read_table(args.dir_data + "PhenSim.tsv", delimiter='\t', header=None, index_col=0)
-# get node list
-nodelist_networkD = list(adj_networkD.index.values)
-# conversion using logstic function
-PheSim = np.array(adj_networkD)
-PheSim = 1 / (1 + np.exp(-15 * PheSim + np.log(9999)))
-np.fill_diagonal(PheSim, 1)
-PheSim = sp.csr_matrix(PheSim)
-del(adj_networkD)
+with open(args.dir_data + 'adj_networkD.pickle', mode='rb') as f:
+    adj_networkD = pickle.load(f)
 
 ### protein-disease network (data used in PRINCE study)
-biadj_networkPD = sp.lil_matrix((len(nodelist_networkP), len(nodelist_networkD)), dtype=np.float64)
-data = pd.read_csv(args.dir_data + "associations.txt", header=None, delimiter='\t', comment='#')
-data_sub = data[[0,1]]
-data_sub = data_sub.drop_duplicates()
-# extract the pairs of nodes appering network P and network D, respectively
-data_sub = data_sub[data_sub[1].isin(nodelist_networkP) & data_sub[0].isin(nodelist_networkD)]
-
-# ToDo: faster implementation
-for index, row in data_sub.iterrows():
-    idxP = nodelist_networkP.index(row[1])
-    idxD = nodelist_networkD.index(row[0])
-    biadj_networkPD[idxP,idxD] = 1
-
-biadj_networkPD = sp.csr_matrix(biadj_networkPD)
+with open(args.dir_data + 'biadj_networkPD.pickle', mode='rb') as f:
+    biadj_networkPD = pickle.load(f)
 
 # get the list of protein-disease pairs
 PD_pairs = biadj_networkPD.nonzero()
@@ -92,7 +51,7 @@ for i in range(nb_PD_pairs):
     biadj_networkPD[idx_P, idx_D] = 0.0
     biadj_networkPD.eliminate_zeros()
     # set initial label
-    yP = np.ravel(sp.csr_matrix.max(biadj_networkPD.multiply(PheSim[idx_D]), axis=1).todense())
+    yP = np.ravel(sp.csr_matrix.max(biadj_networkPD.multiply(adj_networkD[idx_D]), axis=1).todense())
     # propagation
     fP, convergent = netprop(norm_adj_networkP, yP, args.alpha, args.eps, args.max_iter)
     # ranking
