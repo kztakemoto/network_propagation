@@ -48,7 +48,7 @@ PD_pairs = biadj_networkPD.nonzero()
 # number of protein-disease pairs
 nb_PD_pairs = len(PD_pairs[0])
 
-#### Network propagation PRINCE ###########################
+#### Network propagation MINProp ###########################
 roc_value_set = np.array([], dtype=np.float64)
 rankings = np.array([], dtype=np.int64)
 for i in range(nb_PD_pairs):
