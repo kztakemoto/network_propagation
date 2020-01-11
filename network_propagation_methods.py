@@ -4,8 +4,6 @@ import networkx as nx
 from networkx.algorithms import bipartite
 
 def netprop(adj_X, yX, alpha, eps, max_iter):
-    convergent = True
-
     y = yX
 
     nb_iter_inner = 0
@@ -16,16 +14,13 @@ def netprop(adj_X, yX, alpha, eps, max_iter):
         f = (1 - alpha) * y + alpha * adj_X.dot(f)
         nb_iter_inner = nb_iter_inner + 1
 
-    if nb_iter_inner >= max_iter:
-        convergent = False
+    convergent = nb_iter_inner < max_iter
 
     return f, convergent
 
 ###########################################
 
 def single_network_propagation_2(adj_X, biadj_XY, fY, yX, alpha=0.3, eps=1e-6, max_iter=1000):
-    convergent = True
-
     sum_sij_fj = biadj_XY.dot(fY)
     y = (1 - 2 * alpha) * yX / (1 - alpha) + alpha * sum_sij_fj / (1 - alpha)
 
@@ -37,8 +32,7 @@ def single_network_propagation_2(adj_X, biadj_XY, fY, yX, alpha=0.3, eps=1e-6, m
         f = (1 - alpha) * y + alpha * adj_X.dot(f)
         nb_iter_inner = nb_iter_inner + 1
 
-    if nb_iter_inner >= max_iter:
-        convergent = False
+    convergent = nb_iter_inner < max_iter
 
     return f, convergent
 
@@ -52,7 +46,6 @@ def minprop_2(adj_X, adj_Y, biadj_XY, yX, yY, alphaX=0.3, alphaY=0.3, eps=1e-6, 
     fY_old = np.full(len(yY), np.inf, dtype=np.float64)
 
     nb_iter_outer = 0
-    convergent = True
     while (np.linalg.norm(fX - fX_old, ord=1) > eps or np.linalg.norm(fY - fY_old, ord=1) > eps) and nb_iter_outer < max_iter:
         fX_old = fX
         fY_old = fY
@@ -64,15 +57,12 @@ def minprop_2(adj_X, adj_Y, biadj_XY, yX, yY, alphaX=0.3, alphaY=0.3, eps=1e-6, 
         # iteration
         nb_iter_outer = nb_iter_outer + 1
 
-    if nb_iter_outer >= max_iter:
-            convergent = False
+    convergent = nb_iter_outer < max_iter:
     
     return fX, fY, convergent
 
 ##################################################
 def single_network_propagation_3(adj_X, biadj_XY, biadj_XZ, fY, fZ, yX, alpha=0.3, eps=1e-6, max_iter=1000):
-    convergent = True
-
     sum_sij_fj = biadj_XY.dot(fY) + biadj_XZ.dot(fZ)
     y = (1 - 3 * alpha) * yX / (1 - alpha) + alpha * sum_sij_fj / (1 - alpha)
 
@@ -84,8 +74,7 @@ def single_network_propagation_3(adj_X, biadj_XY, biadj_XZ, fY, fZ, yX, alpha=0.
         f = (1 - alpha) * y + alpha * adj_X.dot(f)
         nb_iter_inner = nb_iter_inner + 1
 
-    if nb_iter_inner >= max_iter:
-        convergent = False
+    convergent = nb_iter_inner < max_iter
 
     return f, convergent
 
@@ -100,7 +89,6 @@ def minprop_3(adj_X, adj_Y, adj_Z, biadj_XY, biadj_XZ, biadj_YZ, yX, yY, yZ, alp
     fZ_old = np.full(len(yZ), np.inf, dtype=np.float64)
 
     nb_iter_outer = 0
-    convergent = True
     while (np.linalg.norm(fX - fX_old, ord=1) > eps or np.linalg.norm(fY - fY_old, ord=1) > eps or np.linalg.norm(fZ - fZ_old, ord=1)) and nb_iter_outer < max_iter:
         fX_old = fX
         fY_old = fY
@@ -115,8 +103,7 @@ def minprop_3(adj_X, adj_Y, adj_Z, biadj_XY, biadj_XZ, biadj_YZ, yX, yY, yZ, alp
         # iteration
         nb_iter_outer = nb_iter_outer + 1
 
-    if nb_iter_outer >= max_iter:
-        convergent = False
+    convergent = nb_iter_outer < max_iter
     
     return fX, fY, fZ, convergent
 
