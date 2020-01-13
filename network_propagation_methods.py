@@ -57,7 +57,7 @@ def minprop_2(adj_X, adj_Y, biadj_XY, yX, yY, alphaX=0.3, alphaY=0.3, eps=1e-6, 
         # iteration
         nb_iter_outer = nb_iter_outer + 1
 
-    convergent = nb_iter_outer < max_iter:
+    convergent = nb_iter_outer < max_iter
     
     return fX, fY, convergent
 
