@@ -89,7 +89,7 @@ def minprop_3(adj_X, adj_Y, adj_Z, biadj_XY, biadj_XZ, biadj_YZ, yX, yY, yZ, alp
     fZ_old = np.full(len(yZ), np.inf, dtype=np.float64)
 
     nb_iter_outer = 0
-    while (np.linalg.norm(fX - fX_old, ord=1) > eps or np.linalg.norm(fY - fY_old, ord=1) > eps or np.linalg.norm(fZ - fZ_old, ord=1)) and nb_iter_outer < max_iter:
+    while (np.linalg.norm(fX - fX_old, ord=1) > eps or np.linalg.norm(fY - fY_old, ord=1) > eps or np.linalg.norm(fZ - fZ_old, ord=1) > eps) and nb_iter_outer < max_iter:
         fX_old = fX
         fY_old = fY
         fZ_old = fZ
