@@ -1,6 +1,3 @@
-import warnings
-warnings.simplefilter('ignore')
-
 import argparse
 import urllib.request
 import numpy as np
@@ -28,7 +25,8 @@ edgelist = edgelist.drop_duplicates()
 # network object
 g = nx.from_pandas_edgelist(edgelist, source='source', target='target', edge_attr='weight')
 # extract the largest connected component
-g = max(nx.connected_component_subgraphs(g), key=len)
+gcc = sorted(nx.connected_components(g), key=len, reverse=True)
+g = g.subgraph(gcc[0])
 del(data)
 # get adjacency matrix
 adj_networkP = nx.adjacency_matrix(g)
@@ -56,7 +54,7 @@ print("generate the adjacency matrix")
 adj_networkD = pd.read_table(args.dir_data + "networkD.txt", delimiter='\t', header=None, index_col=0)
 # get node list
 nodelist_networkD = list(adj_networkD.index.values)
-# conversion using logstic function
+# conversion using logistic function
 PheSim = np.array(adj_networkD)
 PheSim = 1 / (1 + np.exp(-15 * PheSim + np.log(9999)))
 np.fill_diagonal(PheSim, 1.0)

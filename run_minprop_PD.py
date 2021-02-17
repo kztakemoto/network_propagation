@@ -1,7 +1,5 @@
 import warnings
 warnings.simplefilter('ignore')
-import sys
-sys.dont_write_bytecode = True
 
 import argparse
 import pickle
