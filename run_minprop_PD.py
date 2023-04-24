@@ -49,7 +49,8 @@ nb_PD_pairs = len(PD_pairs[0])
 #### Network propagation MINProp ###########################
 roc_value_set = np.array([], dtype=np.float64)
 rankings = np.array([], dtype=np.int64)
-for i in range(nb_PD_pairs):
+#for i in range(nb_PD_pairs):
+for i in range(10):
     # leave-one-out validation
     # remove a protein-disease association
     idx_P = PD_pairs[0][i]
@@ -59,6 +60,8 @@ for i in range(nb_PD_pairs):
     # normalized biadjacency matrix (ToDo: faster implementation)
     degP = np.sum(biadj_networkPD, axis=1)
     degD = np.sum(biadj_networkPD, axis=0)
+    print(degP)
+    print(degD)
     norm_biadj_networkPD = sp.csr_matrix(biadj_networkPD / np.sqrt(np.dot(degP, degD)), dtype=np.float64)
     norm_biadj_networkPD.data[np.isnan(norm_biadj_networkPD.data)] = 0.0
     norm_biadj_networkPD.eliminate_zeros()
@@ -100,4 +103,4 @@ print("Summarized AUC", auc(top_rate_set, sen_set))
 
 # plot ROC-like curve
 plt.scatter(top_rate_set, sen_set)
-plt.show()
+plt.savefig("result_minprop.png")

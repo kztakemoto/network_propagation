@@ -84,4 +84,4 @@ print("Summarized AUC", auc(top_rate_set, sen_set))
 
 # plot ROC-like curve
 plt.scatter(top_rate_set, sen_set)
-plt.show()
+plt.savefig("result_prince.png")
