@@ -136,21 +136,21 @@ def sample_data(seed=123):
     norm_adj_networkC = sp.csr_matrix(adj_networkC / np.sqrt(np.dot(deg_networkC.T, deg_networkC)), dtype=np.float64)
 
     # Hetero networks
-    biadj_networkPD = bipartite.biadjacency_matrix(obj_networkPD, row_order=range(nb_nodes_networkP))
+    biadj_networkPD = sp.csr_matrix(bipartite.biadjacency_matrix(obj_networkPD, row_order=range(nb_nodes_networkP)))
     degP = np.sum(biadj_networkPD, axis=1)
     degD = np.sum(biadj_networkPD, axis=0)
     norm_biadj_networkPD = sp.csr_matrix(biadj_networkPD / np.sqrt(np.dot(degP, degD)), dtype=np.float64)
     norm_biadj_networkPD.data[np.isnan(norm_biadj_networkPD.data)] = 0.0
     norm_biadj_networkPD.eliminate_zeros()
 
-    biadj_networkPC = bipartite.biadjacency_matrix(obj_networkPC, row_order=range(nb_nodes_networkP))
+    biadj_networkPC = sp.csr_matrix(bipartite.biadjacency_matrix(obj_networkPC, row_order=range(nb_nodes_networkP)))
     degP = np.sum(biadj_networkPC, axis=1)
     degC = np.sum(biadj_networkPC, axis=0)
     norm_biadj_networkPC = sp.csr_matrix(biadj_networkPC / np.sqrt(np.dot(degP, degC)), dtype=np.float64)
     norm_biadj_networkPC.data[np.isnan(norm_biadj_networkPC.data)] = 0.0
     norm_biadj_networkPC.eliminate_zeros()
 
-    biadj_networkDC = bipartite.biadjacency_matrix(obj_networkDC, row_order=range(nb_nodes_networkD))
+    biadj_networkDC = sp.csr_matrix(bipartite.biadjacency_matrix(obj_networkDC, row_order=range(nb_nodes_networkD)))
     degD = np.sum(biadj_networkDC, axis=1)
     degC = np.sum(biadj_networkDC, axis=0)
     norm_biadj_networkDC = sp.csr_matrix(biadj_networkDC / np.sqrt(np.dot(degD, degC)), dtype=np.float64)
