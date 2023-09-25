@@ -3,6 +3,12 @@ Network propagation-based link prediction methods implemented in Python.
 
 PRINCE and MINProp are available.
 
+## Requirements
+Python 3.9
+```
+pip install -r requirements.txt
+```
+
 ## Network data
 * [Human protein-protein interaction network](http://cbdm-01.zdv.uni-mainz.de/~mschaefer/hippie/hippie_current.txt) form [HIPPIE (Human Integrated Protein-Protein Interaction rEference)](http://cbdm-01.zdv.uni-mainz.de/~mschaefer/hippie/)
 * [Phenotypic disease similarity (zipped)](http://www.cs.tau.ac.il/%7Ebnet/software/PrincePlugin/PhenSim.zip) from [PRINCE Plugin](http://www.cs.tau.ac.il/~bnet/software/PrincePlugin/)
