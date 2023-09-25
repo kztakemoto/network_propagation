@@ -15,7 +15,7 @@ args = parser.parse_args()
 ### protein-protein interaction network
 print("## Protein-protein interaction network")
 print("download the data")
-urllib.request.urlretrieve("http://cbdm-01.zdv.uni-mainz.de/~mschaefer/hippie/hippie_current.txt", args.dir_data + "networkP.txt")
+urllib.request.urlretrieve("http://cbdm-01.zdv.uni-mainz.de/~mschaefer/hippie/hippie_v2_0.txt", args.dir_data + "networkP.txt")
 print("generate the normalized adjacency matrix")
 data = pd.read_csv(args.dir_data + "networkP.txt", delimiter='\t', header=None)
 edgelist = data[[1,3,4]]
