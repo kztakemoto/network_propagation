@@ -74,19 +74,19 @@ print("generate the biadjacency matrix")
 data = pd.read_csv(args.dir_data + "binetworkPD.txt", header=None, delimiter='\t', comment='#')
 data_sub = data[[0,1]]
 data_sub = data_sub.drop_duplicates()
+
 # extract the pairs of nodes appering network P and network D, respectively
 data_sub = data_sub[data_sub[1].isin(nodelist_networkP) & data_sub[0].isin(nodelist_networkD)]
 
-biadj_networkPD = sp.lil_matrix((len(nodelist_networkP), len(nodelist_networkD)), dtype=np.float64)
-# ToDo: faster implementation
-for index, row in data_sub.iterrows():
-    idxP = nodelist_networkP.index(row[1])
-    idxD = nodelist_networkD.index(row[0])
-    biadj_networkPD[idxP,idxD] = 1
+# get indices
+idxP = data_sub[1].apply(lambda x: nodelist_networkP.index(x))
+idxD = data_sub[0].apply(lambda x: nodelist_networkD.index(x))
 
-biadj_networkPD = sp.csr_matrix(biadj_networkPD)
+# generate biadjacency matrix
+biadj_networkPD = sp.lil_matrix((len(nodelist_networkP), len(nodelist_networkD)), dtype=np.float64)
+biadj_networkPD[idxP, idxD] = 1
+biadj_networkPD = biadj_networkPD.tocsr()
 
 print("pickle the matrix")
 with open(args.dir_data + 'biadj_networkPD.pickle', mode='wb') as f:
     pickle.dump(biadj_networkPD, f)
-
