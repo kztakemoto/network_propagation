@@ -31,7 +31,7 @@ del(data)
 # get adjacency matrix
 adj_networkP = nx.adjacency_matrix(g)
 # remove selfloop
-sp.csr_matrix.setdiag(adj_networkP, 0)
+adj_networkP.setdiag(0)
 adj_networkP.eliminate_zeros()
 # get node list
 nodelist_networkP = list(g.nodes)
